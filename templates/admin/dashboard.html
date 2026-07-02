@@ -1,0 +1,74 @@
+{% extends "admin/base.html" %}
+
+{% block admin_title %}Dashboard{% endblock %}
+{% block admin_header %}Dashboard{% endblock %}
+
+{% block admin_content %}
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-500">Total Sales</span>
+            <i class="fas fa-arrow-up text-emerald-500"></i>
+        </div>
+        <p class="text-2xl font-bold text-[#1C1B19] mt-2">Rs. {{ "%.2f"|format(total_sales|float) }}</p>
+        <p class="text-xs text-gray-400 mt-1">From all orders</p>
+    </div>
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-500">Pending Orders</span>
+            <i class="fas fa-clock text-amber-500"></i>
+        </div>
+        <p class="text-2xl font-bold text-[#1C1B19] mt-2">{{ pending_orders }}</p>
+        <p class="text-xs text-gray-400 mt-1">Awaiting shipment</p>
+    </div>
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-500">Total Products</span>
+            <i class="fas fa-box text-[#9A7B56]"></i>
+        </div>
+        <p class="text-2xl font-bold text-[#1C1B19] mt-2">{{ total_products }}</p>
+        <p class="text-xs text-gray-400 mt-1">In inventory</p>
+    </div>
+</div>
+
+<!-- Recent Orders Table -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h3 class="font-semibold text-[#1C1B19]">Recent Orders</h3>
+        <a href="/admin/orders" class="text-sm text-[#9A7B56] hover:underline">View All</a>
+    </div>
+    <table class="admin-table w-full">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in recent_orders %}
+            <tr>
+                <td>#BM-{{ order.id|pad(4, '0') }}</td>
+                <td>{{ order.customer.name }}</td>
+                <td>Rs. {{ "%.2f"|format(order.total_amount|float) }}</td>
+                <td><span class="status-badge 
+                    {%- if order.order_status == 'Pending' %} status-pending
+                    {%- elif order.order_status == 'Shipped' %} status-shipped
+                    {%- elif order.order_status == 'Delivered' %} status-delivered
+                    {%- endif %}">{{ order.order_status }}</span></td>
+                <td>{{ order.created_at.strftime('%Y-%m-%d') }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center py-8 text-gray-400">No orders yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

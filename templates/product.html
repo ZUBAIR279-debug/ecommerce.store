@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Bin Maqsood — Product Detail{% endblock %}
+
+{% block content %}
+
+<div class="max-w-7xl mx-auto px-4 md:px-8 py-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+
+        <!-- Left: Image Gallery -->
+        <div class="space-y-4">
+            <div class="bg-[#f3f0eb] rounded-2xl overflow-hidden">
+                <img id="main-product-img" src="../static/uploads/1.png" alt="Product"
+                    class="w-full h-auto object-cover" />
+            </div>
+            <div class="grid grid-cols-4 gap-3">
+                <img src="../static/uploads/1.png" alt="Thumb"
+                    class="rounded-lg cursor-pointer border-2 border-[#9A7B56] thumb-img"
+                    onclick="changeMainImage(this.src)" />
+                <img src="../static/uploads/2.png" alt="Thumb"
+                    class="rounded-lg cursor-pointer border-2 border-transparent hover:border-[#9A7B56] thumb-img"
+                    onclick="changeMainImage(this.src)" />
+                <img src="../static/uploads/3.png" alt="Thumb"
+                    class="rounded-lg cursor-pointer border-2 border-transparent hover:border-[#9A7B56] thumb-img"
+                    onclick="changeMainImage(this.src)" />
+                <img src="../static/uploads/4.png" alt="Thumb"
+                    class="rounded-lg cursor-pointer border-2 border-transparent hover:border-[#9A7B56] thumb-img"
+                    onclick="changeMainImage(this.src)" />
+            </div>
+        </div>
+
+        <!-- Right: Details -->
+        <div class="flex flex-col justify-center">
+            <p class="text-[#9A7B56] text-sm font-medium uppercase tracking-wider">Bin Maqsood</p>
+            <h1 class="font-['Cormorant_Garamond'] text-3xl md:text-4xl font-bold text-[#1C1B19] mt-1">Embroidered Lawn
+                Suit</h1>
+
+            <div class="flex items-center gap-3 mt-2">
+                <span class="text-2xl font-bold text-[#1C1B19]">Rs. 4,990</span>
+                <span class="text-sm text-[#1C1B19]/40 line-through">Rs. 6,490</span>
+                <span class="bg-[#9A7B56]/10 text-[#9A7B56] text-xs font-semibold px-3 py-1 rounded-full">30% OFF</span>
+            </div>
+
+            <div class="flex items-center gap-2 mt-2">
+                <span class="inline-flex items-center gap-1 text-emerald-600 text-sm font-medium">
+                    <i class="fas fa-check-circle"></i> In Stock
+                </span>
+            </div>
+
+            <hr class="my-5 border-[#e8e3da]" />
+
+            <!-- Fabric Details -->
+            <div class="space-y-2 text-sm text-[#1C1B19]/80">
+                <p><span class="font-semibold">Fabric:</span> Premium Lawn / Chiffon</p>
+                <p><span class="font-semibold">Color:</span> Ivory &amp; Gold</p>
+                <p><span class="font-semibold">Work:</span> Hand Embroidered</p>
+                <p><span class="font-semibold">Fit:</span> Regular</p>
+            </div>
+
+            <hr class="my-5 border-[#e8e3da]" />
+
+            <!-- Quantity -->
+            <div class="flex items-center gap-4">
+                <span class="text-sm font-medium">Qty:</span>
+                <div class="flex items-center gap-2">
+                    <button onclick="changeQty(-1)" class="qty-btn text-sm">−</button>
+                    <span id="product-qty" class="w-8 text-center font-medium">1</span>
+                    <button onclick="changeQty(1)" class="qty-btn text-sm">+</button>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 mt-6">
+                <button onclick="addToCartFromProduct()"
+                    class="flex-1 bg-[#1C1B19] hover:bg-[#9A7B56] text-white font-medium py-3.5 rounded-full transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+                    <i class="fas fa-shopping-bag"></i> Add to Cart
+                </button>
+                <button
+                    class="flex-1 bg-[#25D366] hover:bg-[#1da851] text-white font-medium py-3.5 rounded-full transition shadow-lg flex items-center justify-center gap-2">
+                    <i class="fab fa-whatsapp"></i> Buy via WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function changeMainImage(src) {
+        document.getElementById('main-product-img').src = src;
+        document.querySelectorAll('.thumb-img').forEach(el => {
+            el.classList.remove('border-[#9A7B56]');
+            el.classList.add('border-transparent');
+        });
+        event.target.classList.add('border-[#9A7B56]');
+        event.target.classList.remove('border-transparent');
+    }
+
+    let qty = 1;
+
+    function changeQty(delta) {
+        qty = Math.max(1, qty + delta);
+        document.getElementById('product-qty').textContent = qty;
+    }
+
+    function addToCartFromProduct() {
+        addToCart({
+            id: 1,
+            title: 'Embroidered Lawn Suit',
+            price: 4990,
+            img: document.getElementById('main-product-img').src
+        }, qty);
+    }
+</script>
+
+{% endblock %}

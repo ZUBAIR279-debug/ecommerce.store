@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Order Confirmation — Bin Maqsood{% endblock %}
+
+{% block content %}
+
+<div class="max-w-2xl mx-auto px-4 py-12 text-center">
+    <div class="bg-white rounded-2xl shadow-xl p-8 border border-[#e8e3da]">
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-check text-green-600 text-3xl"></i>
+        </div>
+        <h1 class="font-['Cormorant_Garamond'] text-3xl font-bold text-[#1C1B19]">Order Placed! 🎉</h1>
+        <p class="text-[#1C1B19]/60 mt-2">Your order has been confirmed successfully.</p>
+
+        <div class="mt-6 p-4 bg-[#FCFBF7] rounded-xl border border-[#e8e3da]">
+            <p class="text-sm text-[#1C1B19]/70">
+                <span class="font-semibold">Order ID:</span> #BM-{{ "%04d"|format(order.id) }}
+            </p>
+            <p class="text-sm text-[#1C1B19]/70 mt-1">
+                <span class="font-semibold">Payment Method:</span> {{ order.payment_method }}
+            </p>
+            <p class="text-sm text-[#1C1B19]/70 mt-1">
+                <span class="font-semibold">Total:</span> Rs. {{ order.total_amount|int }}
+            </p>
+        </div>
+
+        <div class="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100 text-left">
+            <p class="text-sm font-medium text-blue-800">
+                <i class="fas fa-info-circle mr-2"></i> What happens next?
+            </p>
+            <ul class="text-sm text-blue-700 mt-2 space-y-1">
+                <li>✅ You will receive your invoice via WhatsApp shortly.</li>
+                <li>✅ The owner has been notified about your order.</li>
+                <li>✅ You will receive a confirmation call for delivery.</li>
+            </ul>
+        </div>
+
+        <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/"
+                class="bg-[#1C1B19] hover:bg-[#9A7B56] text-white font-medium px-6 py-3 rounded-full transition">
+                <i class="fas fa-home mr-2"></i> Continue Shopping
+            </a>
+            <a href="/cart"
+                class="border border-[#1C1B19] hover:bg-[#1C1B19] hover:text-white text-[#1C1B19] font-medium px-6 py-3 rounded-full transition">
+                <i class="fas fa-shopping-bag mr-2"></i> View Orders
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

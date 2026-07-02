@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Bin Maqsood — Checkout{% endblock %}
+
+{% block content %}
+
+<div class="max-w-7xl mx-auto px-4 md:px-8 py-8">
+    <h1 class="font-['Cormorant_Garamond'] text-3xl md:text-4xl font-bold text-[#1C1B19] mb-2">Checkout</h1>
+    <p class="text-[#1C1B19]/60 text-sm mb-8">Complete your order</p>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Form -->
+        <div class="lg:col-span-2">
+            <form id="checkout-form" class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-[#e8e3da]">
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-[#1C1B19] mb-1">Full Name</label>
+                        <input type="text" id="customer-name" class="checkout-input" placeholder="Your full name"
+                            required />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-[#1C1B19] mb-1">Phone Number</label>
+                        <input type="tel" id="customer-phone" class="checkout-input" placeholder="03XX-XXXXXXX"
+                            required />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-[#1C1B19] mb-1">Delivery Address</label>
+                        <textarea id="customer-address" class="checkout-input" rows="3"
+                            placeholder="House #, Street, Sector, City" required></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-[#1C1B19] mb-1">City</label>
+                        <input type="text" id="customer-city" class="checkout-input" placeholder="e.g. Lahore, Karachi"
+                            required />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-[#1C1B19] mb-1">Payment Method</label>
+                        <select id="payment-method" class="checkout-input">
+                            <option value="COD">Cash on Delivery (COD)</option>
+                            <option value="JazzCash">JazzCash</option>
+                            <option value="EasyPaisa">EasyPaisa</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center gap-2 mt-2">
+                        <i class="fas fa-truck text-[#9A7B56]"></i>
+                        <span class="text-sm text-[#1C1B19]/70">Delivery within 3-5 business days</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-wallet text-[#9A7B56]"></i>
+                        <span class="text-sm font-medium text-[#1C1B19]">Payment: Cash on Delivery (COD)</span>
+                    </div>
+
+                    <button type="submit" id="place-order-btn"
+                        class="w-full bg-[#1C1B19] hover:bg-[#9A7B56] text-white font-medium py-3.5 rounded-full transition shadow-lg hover:shadow-xl mt-4">
+                        Place Order
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="lg:col-span-1">
+            <div class="bg-[#FCFBF7] rounded-2xl p-6 border border-[#e8e3da] sticky top-28">
+                <h3 class="font-semibold text-[#1C1B19] text-lg mb-4">Order Summary</h3>
+                <div id="checkout-summary" class="space-y-3">
+                    <!-- Rendered by JS -->
+                </div>
+                <hr class="my-4 border-[#e8e3da]" />
+                <div class="flex justify-between text-lg font-bold text-[#1C1B19]">
+                    <span>Total</span>
+                    <span id="checkout-total">Rs. 0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // ====== Load cart items ======
+    function renderCheckoutSummary() {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const summary = document.getElementById('checkout-summary');
+        const totalEl = document.getElementById('checkout-total');
+
+        if (cart.length === 0) {
+            summary.innerHTML = '<p class="text-[#1C1B19]/60 text-sm">Your cart is empty.</p>';
+            totalEl.textContent = 'Rs. 0';
+            return;
+        }
+
+        summary.innerHTML = cart.map(item => `
+            <div class="flex justify-between text-sm">
+                <span>${item.title} × ${item.qty}</span>
+                <span>Rs. ${(item.price * item.qty).toLocaleString()}</span>
+            </div>
+        `).join('');
+
+        const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+        totalEl.textContent = `Rs. ${total.toLocaleString()}`;
+    }
+
+    // ====== Handle form submit ======
+    document.getElementById('checkout-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const name = document.getElementById('customer-name').value.trim();
+        const phone = document.getElementById('customer-phone').value.trim();
+        const address = document.getElementById('customer-address').value.trim();
+        const city = document.getElementById('customer-city').value.trim();
+        const payment_method = document.getElementById('payment-method').value;
+
+        // Get cart items
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        if (cart.length === 0) {
+            alert('Your cart is empty!');
+            return;
+        }
+
+        // Prepare cart items for backend
+        const cart_items = cart.map(item => ({
+            product_id: item.id,
+            quantity: item.qty
+        }));
+
+        const payload = {
+            name: name,
+            whatsapp: phone,
+            address: address,
+            city: city,
+            payment_method: payment_method,
+            cart_items: cart_items
+        };
+
+        // Show loading state
+        const btn = document.getElementById('place-order-btn');
+        btn.textContent = 'Processing...';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Clear cart from localStorage
+                localStorage.removeItem('cart');
+                // Redirect to confirmation page
+                window.location.href = `/confirmation/${result.order_id}`;
+            } else {
+                alert('Error: ' + (result.error || 'Something went wrong'));
+                btn.textContent = 'Place Order';
+                btn.disabled = false;
+            }
+        } catch (error) {
+            console.error('Checkout error:', error);
+            alert('Network error. Please try again.');
+            btn.textContent = 'Place Order';
+            btn.disabled = false;
+        }
+    });
+
+    // Load summary on page load
+    document.addEventListener('DOMContentLoaded', renderCheckoutSummary);
+</script>
+{% endblock %}

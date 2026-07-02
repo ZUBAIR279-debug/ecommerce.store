@@ -1,0 +1,120 @@
+{% extends "admin/base.html" %}
+
+{% block admin_title %}Orders{% endblock %}
+{% block admin_header %}Manage Orders{% endblock %}
+
+{% block admin_content %}
+
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <table class="admin-table w-full">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="orders-table-body">
+            {% for order in orders %}
+            <tr id="order-row-{{ order.id }}">
+                <td>#BM-{{ order.id|pad(4, '0') }}</td>
+                <td>{{ order.customer.name }}</td>
+                <td>{{ order.items|length }} items</td>
+                <td>Rs. {{ "%.2f"|format(order.total_amount|float) }}</td>
+                <td>
+                    <span id="status-badge-{{ order.id }}" class="status-badge 
+                        {%- if order.order_status == 'Pending' %} status-pending
+                        {%- elif order.order_status == 'Shipped' %} status-shipped
+                        {%- elif order.order_status == 'Delivered' %} status-delivered
+                        {%- endif %}">{{ order.order_status }}</span>
+                </td>
+                <td>{{ order.created_at.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    <!-- Status Dropdown -->
+                    <select onchange="updateStatus({{ order.id }}, this.value)" class="text-xs border rounded px-2 py-1 bg-white">
+                        <option value="Pending" {% if order.order_status == 'Pending' %}selected{% endif %}>Pending</option>
+                        <option value="Shipped" {% if order.order_status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                        <option value="Delivered" {% if order.order_status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                    </select>
+                    <!-- Delete Button -->
+                    <button onclick="deleteOrder({{ order.id }})" class="text-red-500 hover:text-red-700 text-xs ml-2">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center py-8 text-gray-400">No orders found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // -------- Update Status (AJAX, no reload) --------
+    async function updateStatus(orderId, newStatus) {
+        try {
+            const formData = new FormData();
+            formData.append('status', newStatus);
+            
+            const response = await fetch(`/admin/update-order/${orderId}`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Update status badge
+                const badge = document.getElementById(`status-badge-${orderId}`);
+                if (badge) {
+                    badge.textContent = newStatus;
+                    // Update classes
+                    badge.className = 'status-badge';
+                    if (newStatus === 'Pending') badge.classList.add('status-pending');
+                    else if (newStatus === 'Shipped') badge.classList.add('status-shipped');
+                    else if (newStatus === 'Delivered') badge.classList.add('status-delivered');
+                }
+                // Update dropdown selection
+                const select = document.querySelector(`#order-row-${orderId} select`);
+                if (select) select.value = newStatus;
+            } else {
+                alert('Error: ' + (result.error || 'Failed to update status'));
+            }
+        } catch (error) {
+            alert('Network error: ' + error.message);
+        }
+    }
+
+    // -------- Delete Order (AJAX, no reload) --------
+    async function deleteOrder(orderId) {
+        if (!confirm('Are you sure you want to delete this order permanently?')) return;
+        try {
+            const response = await fetch(`/admin/delete-order/${orderId}`, {
+                method: 'DELETE'
+            });
+            const result = await response.json();
+            if (result.success) {
+                // Remove row from table
+                const row = document.getElementById(`order-row-${orderId}`);
+                if (row) row.remove();
+                // If no rows left, show message
+                const tbody = document.getElementById('orders-table-body');
+                if (tbody.children.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-gray-400">No orders found.</td></tr>`;
+                }
+            } else {
+                alert('Error: ' + (result.error || 'Failed to delete order'));
+            }
+        } catch (error) {
+            alert('Network error: ' + error.message);
+        }
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Bin Maqsood — Cart{% endblock %}
+
+{% block content %}
+
+<div class="max-w-7xl mx-auto px-4 md:px-8 py-8">
+    <h1 class="font-['Cormorant_Garamond'] text-3xl md:text-4xl font-bold text-[#1C1B19] mb-2">Your Cart</h1>
+    <p class="text-[#1C1B19]/60 text-sm mb-8">Review your items before checkout</p>
+
+    <div id="cart-container">
+        <!-- Cart items rendered by JS -->
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        renderCart();
+    });
+</script>
+{% endblock %}

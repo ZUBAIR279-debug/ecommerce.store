@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Bin Maqsood — Premium Pret{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <style>
+        /* ... all existing styles ... keep as is */
+        /* I'm including minimal styles, but your existing styles remain */
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px)
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .product-img-wrap {
+            overflow: hidden;
+            border-radius: 0.5rem;
+        }
+
+        .product-img-wrap img {
+            transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-img-wrap:hover img {
+            transform: scale(1.07);
+        }
+
+        .product-card .add-cart-btn {
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            opacity: 0;
+        }
+
+        .product-card:hover .add-cart-btn {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .category-card .overlay {
+            transition: opacity 0.5s ease;
+        }
+
+        .category-card:hover .overlay {
+            opacity: 1;
+        }
+
+        .tab-btn.active {
+            color: #9A7B56;
+            border-bottom: 2px solid #9A7B56;
+        }
+
+        .navbar-shrink {
+            padding-top: 0.5rem !important;
+            padding-bottom: 0.5rem !important;
+            background: rgba(252, 251, 247, 0.92) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        .cart-badge {
+            transition: transform 0.2s ease;
+        }
+
+        .qty-btn {
+            transition: all 0.2s ease;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .qty-btn:hover {
+            background: #9A7B56;
+            color: #fff;
+            border-color: #9A7B56;
+        }
+
+        .admin-btn {
+            background: #1C1B19;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            transition: 0.3s;
+            font-weight: 500;
+        }
+
+        .admin-btn:hover {
+            background: #9A7B56;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+        }
+
+        @media (max-width:640px) {
+            .hero-title {
+                font-size: 2.5rem !important;
+            }
+        }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- ====== HEADER ====== -->
+    <header id="main-header"
+        class="fixed top-0 left-0 w-full z-50 py-4 px-4 md:px-8 transition-all duration-300 bg-[#FCFBF7]/80 backdrop-blur-md border-b border-[#e8e3da]/30">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <button id="mobile-menu-btn" class="md:hidden text-2xl text-[#1C1B19] hover:text-[#9A7B56] transition">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <a href="/"
+                    class="font-['Cormorant_Garamond'] text-2xl md:text-3xl font-bold tracking-wide text-[#1C1B19]">BIN
+                    MAQSOOD</a>
+            </div>
+
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-[#1C1B19]/80">
+                <a href="/" class="hover:text-[#9A7B56] transition">Home</a>
+                <!-- <a href="/products" class="hover:text-[#9A7B56] transition">New Arrivals</a> -->
+                <a href="/mens" class="hover:text-[#9A7B56] transition">Men</a>
+                <a href="/womens" class="hover:text-[#9A7B56] transition">Women</a>
+                <!-- <a href="/about" class="hover:text-[#9A7B56] transition">About</a> -->
+            </nav>
+
+            <div class="flex items-center gap-4 text-[#1C1B19]">
+                <button class="text-lg hover:text-[#9A7B56] transition hidden sm:block"><i
+                        class="fas fa-search"></i></button>
+                <button class="text-lg hover:text-[#9A7B56] transition hidden sm:block"><i
+                        class="far fa-user"></i></button>
+                <a href="/cart" class="relative text-lg hover:text-[#9A7B56] transition">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span id="cart-badge"
+                        class="cart-badge absolute -top-2 -right-3 bg-[#9A7B56] text-white text-[0.6rem] font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                </a>
+                <a href="/admin/dashboard" class="admin-btn hidden md:inline-block"><i class="fas fa-cog"></i> Admin</a>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="md:hidden hidden pt-4 pb-2 border-t border-[#e8e3da]/40 mt-3">
+            <nav class="flex flex-col gap-3 text-sm font-medium text-[#1C1B19]">
+                <a href="/" class="hover:text-[#9A7B56] transition py-1">Home</a>
+                <a href="/products" class="hover:text-[#9A7B56] transition py-1">New Arrivals</a>
+                <a href="/mens" class="hover:text-[#9A7B56] transition py-1">Men</a>
+                <a href="/womens" class="hover:text-[#9A7B56] transition py-1">Women</a>
+                <a href="/about" class="hover:text-[#9A7B56] transition py-1">About</a>
+                <hr class="border-[#e8e3da]/30 my-1" />
+                <div class="flex items-center gap-6 text-base">
+                    <!-- <a href="#" class="hover:text-[#9A7B56] transition"><i class="fas fa-search"></i> Search</a> -->
+                    <a href="#" class="hover:text-[#9A7B56] transition"><i class="far fa-user"></i> Account</a>
+                    <a href="/admin/dashboard" class="hover:text-[#9A7B56] transition"><i class="fas fa-cog"></i>
+                        Admin</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ====== MAIN CONTENT ====== -->
+    <main class="pt-24 md:pt-28">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ====== FOOTER ====== -->
+    <footer class="bg-[#1C1B19] text-[#d4d0c8] mt-8">
+        <div class="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-10">
+                <div class="md:col-span-1">
+                    <span class="font-['Cormorant_Garamond'] text-3xl font-bold text-white">BIN MAQSOOD</span>
+                    <p class="text-sm text-[#d4d0c8]/70 mt-3 max-w-xs">Redefining Pakistani pret with timeless elegance
+                        and contemporary craftsmanship.</p>
+                    <div class="flex gap-4 mt-4">
+                        <a href="#" class="text-[#d4d0c8]/60 hover:text-[#9A7B56] transition text-lg"><i
+                                class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-[#d4d0c8]/60 hover:text-[#9A7B56] transition text-lg"><i
+                                class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-[#d4d0c8]/60 hover:text-[#9A7B56] transition text-lg"><i
+                                class="fab fa-youtube"></i></a>
+                        <a href="#" class="text-[#d4d0c8]/60 hover:text-[#9A7B56] transition text-lg"><i
+                                class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Shop</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-[#9A7B56] transition">New Arrivals</a></li>
+                        <li><a href="#" class="hover:text-[#9A7B56] transition">Men's Collection</a></li>
+                        <li><a href="#" class="hover:text-[#9A7B56] transition">Women's Collection</a></li>
+                        <li><a href="#" class="hover:text-[#9A7B56] transition">Sale</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Support</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-[#9A7B56] transition">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-[#9A7B56] transition">Returns</a></li>
+                        <li><a href="#" class="hover:text-[#9A7B56] transition">Shipping</a></li>
+                        <li><a href="#" class="hover:text-[#9A7B56] transition">Size Guide</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Newsletter</h4>
+                    <p class="text-sm text-[#d4d0c8]/70 mb-3">Subscribe for exclusive drops & offers.</p>
+                    <form class="flex flex-col sm:flex-row gap-2"
+                        onsubmit="event.preventDefault(); alert('Thank you for subscribing!');">
+                        <input type="email" placeholder="Your email"
+                            class="flex-1 px-4 py-2 rounded-full bg-[#2a2826] border border-[#3a3835] text-white text-sm focus:outline-none focus:border-[#9A7B56]"
+                            required />
+                        <button type="submit"
+                            class="bg-[#9A7B56] hover:bg-[#8a6a48] text-white text-sm font-medium px-5 py-2 rounded-full transition whitespace-nowrap">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+            <div
+                class="border-t border-[#2a2826] mt-10 pt-6 text-xs text-[#d4d0c8]/50 flex flex-col sm:flex-row justify-between">
+                <span>&copy; 2026 Bin Maqsood. All rights reserved.</span>
+                <span class="mt-1 sm:mt-0">Made with <i class="fas fa-heart text-[#9A7B56] text-xs"></i> in
+                    Pakistan</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ====== SCRIPTS (LOADED AT END) ====== -->
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/cart.js"></script>
+    {% block extra_scripts %}{% endblock %}
+
+</body>
+
+</html>
