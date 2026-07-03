@@ -72,6 +72,38 @@
             background: #d1fae5;
             color: #065f46;
         }
+
+        /* Mobile sidebar overlay & transition */
+        #mobile-sidebar {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(-100%);
+        }
+        #mobile-sidebar.open {
+            transform: translateX(0);
+        }
+        .sidebar-backdrop {
+            transition: opacity 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .sidebar-backdrop.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        @media (min-width: 768px) {
+            #mobile-sidebar {
+                transform: none !important;
+                position: relative !important;
+                display: block !important;
+            }
+            .sidebar-backdrop {
+                display: none !important;
+            }
+            #sidebar-toggle-btn {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 
@@ -79,12 +111,21 @@
 
     <div class="flex min-h-screen bg-gray-50 font-['Inter']">
 
+        <!-- Backdrop for mobile -->
+        <div id="sidebar-backdrop" class="sidebar-backdrop fixed inset-0 bg-black/40 z-40 md:hidden"></div>
+
         <!-- Sidebar -->
-        <aside
-            class="admin-sidebar w-64 bg-white border-r border-gray-200 min-h-screen p-4 flex-shrink-0 hidden md:block">
-            <div class="mb-8 px-2">
-                <span class="font-bold text-xl text-[#1C1B19]">BIN MAQSOOD</span>
-                <p class="text-xs text-gray-400 mt-0.5">Admin Panel</p>
+        <aside id="mobile-sidebar"
+            class="admin-sidebar fixed md:relative w-64 bg-white border-r border-gray-200 min-h-screen p-4 flex-shrink-0 z-50 md:block hidden overflow-y-auto">
+            <div class="mb-8 px-2 flex justify-between items-center">
+                <div>
+                    <span class="font-bold text-xl text-[#1C1B19]">BIN MAQSOOD</span>
+                    <p class="text-xs text-gray-400 mt-0.5">Admin Panel</p>
+                </div>
+                <!-- Close button for mobile -->
+                <button id="close-sidebar-btn" class="md:hidden text-gray-500 hover:text-gray-700 text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <nav class="space-y-1">
                 <a href="/admin/dashboard"
@@ -111,7 +152,13 @@
             <!-- Top Navbar -->
             <header
                 class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-                <h2 class="text-lg font-semibold text-[#1C1B19]">{% block admin_header %}Dashboard{% endblock %}</h2>
+                <div class="flex items-center gap-3">
+                    <!-- Hamburger button for mobile -->
+                    <button id="sidebar-toggle-btn" class="md:hidden text-xl text-gray-600 hover:text-gray-900">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2 class="text-lg font-semibold text-[#1C1B19]">{% block admin_header %}Dashboard{% endblock %}</h2>
+                </div>
                 <div class="flex items-center gap-4">
                     <span class="text-sm text-gray-500">admin@binmaqsood.com</span>
                     <span
@@ -125,6 +172,60 @@
             </main>
         </div>
     </div>
+
+    <script>
+        // ----- Mobile sidebar toggle -----
+        const sidebar = document.getElementById('mobile-sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        const toggleBtn = document.getElementById('sidebar-toggle-btn');
+        const closeBtn = document.getElementById('close-sidebar-btn');
+
+        function openSidebar() {
+            sidebar.classList.remove('hidden');
+            sidebar.classList.add('open');
+            backdrop.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            backdrop.classList.remove('show');
+            // after transition, hide it (tailwind's hidden)
+            setTimeout(() => {
+                if (!sidebar.classList.contains('open')) {
+                    sidebar.classList.add('hidden');
+                }
+            }, 300);
+            document.body.style.overflow = '';
+        }
+
+        toggleBtn.addEventListener('click', openSidebar);
+        closeBtn.addEventListener('click', closeSidebar);
+        backdrop.addEventListener('click', closeSidebar);
+
+        // Close on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeSidebar();
+            }
+        });
+
+        // Ensure sidebar state on resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768) {
+                // On desktop, ensure sidebar is visible and backdrop hidden
+                sidebar.classList.remove('hidden', 'open');
+                sidebar.style.transform = '';
+                backdrop.classList.remove('show');
+                document.body.style.overflow = '';
+            } else {
+                // On mobile, if sidebar is not open, hide it
+                if (!sidebar.classList.contains('open')) {
+                    sidebar.classList.add('hidden');
+                }
+            }
+        });
+    </script>
 
     {% block admin_scripts %}{% endblock %}
 

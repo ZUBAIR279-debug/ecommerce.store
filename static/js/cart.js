@@ -33,7 +33,7 @@ function updateBadge() {
     }
 }
 
-// -------- ADD TO CART (called from onclick) --------
+// -------- ADD TO CART (with Toast) --------
 function addToCart(product, qty = 1) {
     if (!product || !product.id) {
         console.error('❌ Invalid product');
@@ -57,6 +57,14 @@ function addToCart(product, qty = 1) {
 
     saveCart(cart);
     console.log(`✅ Added "${product.title}" (x${qty}) to cart`);
+
+    // ----- Netflix style Toast Notification -----
+    if (typeof showToast === 'function') {
+        showToast(`✨ ${product.title} added to cart!`);
+    } else {
+        // Fallback: simple alert agar showToast available nahi
+        alert(`✨ ${product.title} added to cart!`);
+    }
 }
 
 // -------- Remove --------
@@ -171,16 +179,13 @@ function renderCart() {
 // -------- Init on page load --------
 document.addEventListener('DOMContentLoaded', function() {
     updateBadge();
-
-    // If we are on cart page, render cart
     if (document.getElementById('cart-container')) {
         renderCart();
     }
-
     console.log('🛒 Cart system ready!');
 });
 
-// Expose to global scope (for inline onclick attributes)
+// Expose to global scope
 window.addToCart = addToCart;
 window.removeFromCart = removeFromCart;
 window.updateCartQty = updateCartQty;

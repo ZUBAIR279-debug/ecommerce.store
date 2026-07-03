@@ -6,7 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.utils import secure_filename
 from config import Config
 from models import db, Customer, Product, Order, OrderItem
-from utils import save_invoice_pdf, notify_owner_and_customer
+from utils import save_invoice_pdf, notify_owner_and_customer, send_status_update
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -232,6 +232,11 @@ def update_order_status(order_id):
         return jsonify({'error': 'Order not found'}), 404
     order.order_status = new_status
     db.session.commit()
+
+    # Customer ko message bhejo (agar status Pending se change ho)
+    if new_status != 'Pending':
+        send_status_update(order, new_status)
+
     return jsonify({'success': True, 'new_status': new_status})
 
 

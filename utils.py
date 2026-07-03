@@ -1,11 +1,11 @@
 import os
-import requests
+import webbrowser
+import urllib.parse
 from flask import current_app
 from fpdf import FPDF
 from datetime import datetime
 
 # ---------- PDF Generation ----------
-
 class InvoicePDF(FPDF):
     def __init__(self, order, customer, items):
         super().__init__()
@@ -61,7 +61,7 @@ class InvoicePDF(FPDF):
         self.set_font('Arial', '', 10)
         for item in self.items:
             product = item.product
-            price_float = float(item.price) 
+            price_float = float(item.price)
             self.cell(80, 8, product.title[:40], border=1)
             self.cell(30, 8, str(item.quantity), border=1, align='C')
             self.cell(40, 8, f"Rs. {price_float:.2f}", border=1, align='R')
@@ -100,7 +100,6 @@ class InvoicePDF(FPDF):
         self.customer_details()
         self.items_table()
         self.totals_and_payment()
-        
         res = self.output(dest='S')
         if isinstance(res, str):
             return res.encode('latin1')
@@ -120,43 +119,48 @@ def save_invoice_pdf(order, customer, items):
         f.write(pdf_bytes)
     return filepath
 
-# ---------- Fully Free Automatic System Routing ----------
-
-def send_free_whatsapp_message(phone_number, message_text):
-    """Bina kisi paid API ke public zero-cost endpoints se automated text route karne ka system"""
-    phone_number = phone_number.replace("+", "").replace("-", "").replace(" ", "")
-    if phone_number.startswith("0"):
-        phone_number = "92" + phone_number[1:]
-
-    # Public free messaging nodes for testing
-    url = f"https://api.whatsapp.com/send?phone={phone_number}&text={requests.utils.quote(message_text)}"
-    
-    # Background worker simulates the routing log so the system never crashes
-    try:
-        print(f"[AUTOMATIC OUTBOUND LOG] Message Sent Successfully to {phone_number}")
-        # Local background simulation
-        requests.get(f"https://httpbin.org/get", timeout=3)
-        return True
-    except:
-        return False
-
-def notify_owner_and_customer(order, customer, items, pdf_path):
-    owner_number = os.environ.get('WHATSAPP_OWNER_NUMBER', '+923080320007')
-    customer_number = customer.whatsapp_number
-
-    # Text formatting for automatic instant delivery logs
-    owner_msg = (f"New Order Received! 🚀\n\n"
-                 f"Order ID: #BM-{order.id:04d}\n"
-                 f"Customer: {customer.name}\n"
-                 f"Payment: {order.payment_method}\n"
-                 f"Total: Rs. {float(order.total_amount):.2f}\n\n"
-                 f"Invoice Saved Local Path: {pdf_path}")
-    send_free_whatsapp_message(owner_number, owner_msg)
-
-    customer_msg = (f"Dear {customer.name},\n\n"
-                    f"Thank you for shopping with Bin Maqsood! 🎉\n"
-                    f"Your order #BM-{order.id:04d} is confirmed via {order.payment_method}.\n"
-                    f"Total amount: Rs. {float(order.total_amount):.2f}.\n\n"
-                    f"Your professional invoice has been generated and saved to your account.")
-    send_free_whatsapp_message(customer_number, customer_msg)
+# ---------- WHATSAPP DEEP LINK (FREE, NO API) ----------
+def send_whatsapp_message(phone_number, message_text, pdf_path=None):
+    clean_phone = phone_number.replace("+", "").replace(" ", "").replace("-", "").strip()
+    if clean_phone.startswith("0"):
+        clean_phone = "92" + clean_phone[1:]
+    encoded_msg = urllib.parse.quote(message_text)
+    url = f"https://wa.me/{clean_phone}?text={encoded_msg}"
+    webbrowser.open(url)
+    print(f"✅ WhatsApp opened for {phone_number}")
     return True
+
+# ---------- NOTIFICATIONS ----------
+def notify_owner_and_customer(order, customer, items, pdf_path):
+    owner_number = current_app.config.get('WHATSAPP_OWNER_NUMBER', '+923080320007')
+
+    owner_msg = (
+        f"🛍️ *New Order Received!*\n\n"
+        f"📋 Order ID: #BM-{order.id:04d}\n"
+        f"👤 Customer: {customer.name}\n"
+        f"📞 Phone: {customer.whatsapp_number}\n"
+        f"📍 Address: {customer.address}\n"
+        f"🏙️ City: {customer.city}\n"
+        f"💳 Payment: {order.payment_method}\n"
+        f"💰 Total: Rs. {float(order.total_amount):.2f}\n\n"
+        f"📦 Items:\n"
+    )
+    for item in items:
+        product = item.product
+        owner_msg += f"  • {product.title} x {item.quantity} = Rs. {float(item.price) * item.quantity:.2f}\n"
+    
+    owner_msg += f"\n✅ Please confirm the order and arrange delivery."
+
+    # Sirf owner ko bhejo (customer ko nahi)
+    send_whatsapp_message(owner_number, owner_msg)
+
+def send_status_update(order, new_status):
+    customer = order.customer
+    if new_status == 'Shipped':
+        msg = f"🚚 Dear {customer.name},\n\nYour order #BM-{order.id:04d} has been *shipped*!\nYou will receive it soon.\n\nThank you for shopping with Bin Maqsood."
+    elif new_status == 'Delivered':
+        msg = f"🎉 Dear {customer.name},\n\nYour order #BM-{order.id:04d} has been *delivered*!\nWe hope you love it!\nPlease rate us on our website."
+    else:
+        msg = f"📋 Dear {customer.name},\n\nYour order #BM-{order.id:04d} status is now: *{new_status}*."
+    
+    send_whatsapp_message(customer.whatsapp_number, msg)
